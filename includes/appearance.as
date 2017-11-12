@@ -95,7 +95,7 @@ public function appearance(forTarget:Creature):void
 				break;
 		}
 		output2(" wings sprouting from your back fold" + (lotsUpFront ? "s" : "") + " over your shoulders to drape over your front like a shawl");
-		if (showAss && target.areWingsCoveringAss()) output2(" while another pair discretely covers your behind");
+		if (showAss && target.areWingsCoveringAss()) output2(" while another pair discreetly covers your behind");
 		output2(". Underneath the wings,");
 	}
 	// Clothes as clothes
@@ -120,7 +120,7 @@ public function appearance(forTarget:Creature):void
 			var coveredTracking: Number = 0;
 			output2(" Your");
 			if (usingFur) {
-				output2((targethasSkinFlag(GLOBAL.FLAG_FLUFFY) ? " thick" : "") + (target.hasFeathers() ? " feathers":" fur"));
+				output2((target.hasSkinFlag(GLOBAL.FLAG_FLUFFY) ? " thick" : "") + (target.hasFeathers() ? " feathers":" fur"));
 				if (coverCount - coveredTracking > 2) output2(",");
 				else if (coverCount - coveredTracking == 2) output(" and");
 				coveredTracking++;
@@ -3823,8 +3823,8 @@ public function vaginaBonusForAppearance(forTarget:Creature = null, x:int = 0, e
 			break;
 		//Naleen flavor
 		case GLOBAL.TYPE_NAGA:
-			if(!eachOne) output2(" The exterior lips are subtle and narrow, making your lengthy entrance a little more discrete.");
-			else output2("\nEach vagina’s exterior lips are subtle and narrow, making your lengthy entrances a little more discrete.");
+			if(!eachOne) output2(" The exterior lips are subtle and narrow, making your lengthy entrance a little more discreet.");
+			else output2("\nEach vagina’s exterior lips are subtle and narrow, making your lengthy entrances a little more discreet.");
 			break;
 		//LEITHAN FLAVOR
 		case GLOBAL.TYPE_LEITHAN:

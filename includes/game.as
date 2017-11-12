@@ -1878,7 +1878,6 @@ public function move(arg:String, goToMainMenu:Boolean = true):void
 	//Prevent movement for nudists into nude-restricted zones.
 	if(rooms[arg].hasFlag(GLOBAL.NUDITY_ILLEGAL))
 	{
-		var nudistPrevention:Boolean = false;
 		var showTits: Boolean = (pc.hasBreasts() && pc.isChestVisible() && !pc.isCoveringChest());
 		var showCrotch: Boolean = ((pc.hasGenitals() || pc.balls > 0) && pc.isCrotchVisible() && !pc.isCoveringCrotch());
 		var showAss: Boolean = (pc.isAssVisible() && !pc.isCoveringAss());
