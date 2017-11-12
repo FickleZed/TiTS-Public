@@ -3275,33 +3275,173 @@
 			//return (armor.shortName == "" && lowerUndergarment.shortName == "" && upperUndergarment.shortName == "");
 			return (!isCrotchGarbed() && !isChestCovered());
 		}
-		public function canCoverSelf(checkGenitals:Boolean = false, part:String = "all"): Boolean {
-			// Part-specific checks
-			if(part == "wings" && !hasJointedWings()) return false;
-			// Omnisuit
-			if(part != "wings" && armor is Omnisuit) return true;
-			// See if your body can cover itself
-			if(part != "wings" && canUseTailsOrFurAsClothes()) return true;
-			// Normal genital location
-			if(!checkGenitals || genitalLocation() <= 1)
-			{
-				// Cover yourself with your fuckton of wings
-				if(wingType == GLOBAL.TYPE_DOVE)
-				{
-					if(wingCount >= 4) return true;
-					return false;
-				}
-				if(hasJointedWings())
-				{
-					if(checkGenitals && statusEffectv1("Wing Position") != 1) return false;
-					return true;
-				}
+
+		public function isCoveringChest(): Boolean {
+			return (isFurCoveringChest() || isHairCoveringChest() || areWingsCoveringChest() || areTailsCoveringChest());
+		}
+
+		public function isCoveringCrotch(): Boolean {
+			return (isFurCoveringCrotch() || areWingsCoveringCrotch() || areTailsCoveringCrotch());
+		}
+
+		public function isCoveringAss(): Boolean {
+			return (isFurCoveringAss() || areTailsCoveringAss() || areWingsCoveringAss());
+		}
+
+		public function canWingsCoverSelf(checkGenitals:Boolean = false, checkAss:Boolean = false): Boolean {
+			// Doesn't have capable wings
+			if (!hasJointedWings()) return false;
+
+			if (checkGenitals) {
+				// Wings can't reach back-genitals on taurs/driders
+				if (genitalLocation() > 1) return false;
 			}
+
+			if (checkAss) {
+				// Can't reach the rear end of taurs/driders
+				if (legCount > 2) return false;
+
+				// Need at least two pairs of wings to cover front and back at the same time
+				if (wingCount < 4) return false;
+			}
+
+			// Passed all the conditions
+			return true;
+		}
+
+		// A general check for the current position of the wings
+		public function areWingsCoveringSelf(): Boolean {
+			return statusEffectv1("Wing Position") == 1;
+		}
+
+		public function areWingsCoveringChest(): Boolean {
+			// Chest is easy.  It's right there.
+			return areWingsCovering();
+		}
+
+		public function areWingsCoveringCrotch(): Boolean {
+			// Wings can't reach back-genitals on taurs/driders
+			return areWingsCovering() && genitalLocation() <= 1;
+		}
+
+		public function areWingsCoveringAss(): Boolean {
+			if (!areWingsCovering()) return false;
+
+			// Wings can't reach back-genitals on taurs/driders
+			if (legCount > 2) return false;
+
+			// Need more than 1 pair of wings to cover the back as well as the front
+			if (wingCount <= 2) return false;
+
+			// Passed all the conditions
+			return true;
+		}
+
+		public function canHairCoverChest(): Boolean {
+			if (hairLength < tallness/4) return false;
 			
+			if (InCollection(hairStyle, ["ponytail", "mohawk", "afro", "spikes", "front wave", "backwards slick", "messy chignon", "tight chignon", "side plait", "single braid", "crown braid", "pigtail buns"])) return false;
+
+			return true;
+		}
+
+		public function isHairCoveringChest(): Boolean {
+			// Seems too unlikely that this can be consistently maintained
 			return false;
 		}
-		public function canUseTailsOrFurAsClothes():Boolean
-		{
+
+		public function canTailsCoverSelf(): Boolean {
+			if (!hasTail()) return false;
+
+			if (!InCollection(tailType, [GLOBAL.FLAG_LONG, GLOBAL.FLAG_PREHENSILE])) return false;
+
+			return true;
+		}
+
+		// A general check for the current position of the tails
+		public function areTailsCoveringSelf(): Boolean {
+			return false;
+		}
+
+		public function areTailsCoveringChest(): Boolean {
+			return false;
+		}
+
+		public function areTailsCoveringCrotch(): Boolean {
+			return false;
+		}
+
+		public function areTailsCoveringAss(): Boolean {
+			if (!hasTail()) return false;
+
+			// Pretty much what tails do, yo
+			return true;
+		}
+
+		public function isFurCoveringChest(): Boolean {
+			if (!hasFur() && !hasFeathers()) return false;
+			
+			var isFluffy: Boolean = hasSkinFlag(GLOBAL.FLAG_FLUFFY);
+
+			// Gotta check if any tits are sticking out
+			for (var i:int = 0; i < breastRows.length; i++) 
+			{
+				titSize = breastRows[i].breastRating();
+				if (titSize >= 100 && breastRows[i].nippleType != GLOBAL.NIPPLE_TYPE_FLAT) return false; // Can't hide hyper-sized tits!
+				if
+				(	titSize > (isFluffy ? (i < 2 ? 2 : 1) : 0) // fluffy fur can disguise B-cups on chest (due to that fluffy fur ball in description) and A-cups on belly
+				//|| 	breastRows[i].nippleType == GLOBAL.NIPPLE_TYPE_LIPPLES // lipples? they should look quite obscene, but this is not checked in main function
+				//|| 	InCollection(breastRows[i].nippleType, GLOBAL.NIPPLE_TYPE_NORMAL, GLOBAL.NIPPLE_TYPE_DICK, GLOBAL.NIPPLE_TYPE_TENTACLED) && nippleLength(biggestTitRow()) >= 1 // even with flats, too long nipples are quite obscene, but this is not checked in main function
+				) return false;
+			}
+			
+			return true;
+		}
+
+		public function isFurCoveringCrotch(): Boolean {
+			if (!hasFur() && !hasFeathers()) return false;
+			
+			var isFluffy: Boolean = hasSkinFlag(GLOBAL.FLAG_FLUFFY);
+
+			if(hasCock()) {
+				if (!hasStatusEffect("Genital Slit")) return false;
+			}
+			
+			if (balls > 0) {
+				// Genital Slit effect on balls is ambiguous, so I'm not counting it
+
+				if (scrotumType() != GLOBAL.FLAG_FURRED) return false;
+
+				if (ballSize() > (hasStatusEffect("Uniball") ? 1.5 : 1)) return false; // Too big, even for fluffy
+
+				if (!isFluffy && ballSize() > (hasStatusEffect("Uniball") ? 1 : 0.75)) return false; // Too big for non-fluffy
+			}
+			
+			if (hasVagina())
+			{
+				if (puffiestVaginalPuffiness() >= 4) return false;
+
+				if (!isFluffy && puffiestVaginalPuffiness() >= 2) return false;
+
+				// Fur only covers the most modest of cunts
+				if (vaginaTotal(GLOBAL.TYPE_FELINE) + vaginaTotal(GLOBAL.TYPE_AVIAN) != vaginaTotal()) return false;
+			}
+
+			// Everything checked out
+			return true;
+		}
+
+		public function isFurCoveringAss(): Boolean{
+			if (!hasFur() && !hasFeathers()) return false;
+
+			if (analPuffiness() >= 2) return false;
+
+			if (analPuffiness() >= 1 && !hasSkinFlag(GLOBAL.FLAG_FLUFFY)) return false;
+			
+			return true;
+		}
+
+		public function canUseTailsOrFurAsClothes(): Boolean {
 			var coverage:int = 0;
 			var bitsNeedCover:int = 0;
 			var hasFurOrFeathers:Boolean = (hasFur() || hasFeathers());
@@ -10453,7 +10593,7 @@
 		{
 			wingType = wingShape;
 			wingCount = wingNum;
-			if(!hasJointedWings()) removeStatusEffect("Wing Position");
+			if(!canWingsCoverSelf()) removeStatusEffect("Wing Position");
 		}
 		//check for vagoo
 		public function hasVagina(hole: int = 0): Boolean {

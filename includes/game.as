@@ -1879,13 +1879,24 @@ public function move(arg:String, goToMainMenu:Boolean = true):void
 	if(rooms[arg].hasFlag(GLOBAL.NUDITY_ILLEGAL))
 	{
 		var nudistPrevention:Boolean = false;
-		if((!pc.isChestGarbed() || pc.isChestVisible()) && pc.biggestTitSize() > 1) nudistPrevention = true;
-		if(!pc.isCrotchGarbed() || ((pc.hasGenitals() || pc.balls > 0) && pc.isCrotchVisible()) || pc.isAssVisible()) nudistPrevention = true;
-		if(pc.canCoverSelf(true)) nudistPrevention = false;
-		if(nudistPrevention)
+		var showTits: Boolean = (pc.hasBreasts() && pc.isChestVisible() && !pc.isCoveringChest());
+		var showCrotch: Boolean = ((pc.hasGenitals() || pc.balls > 0) && pc.isCrotchVisible() && !pc.isCoveringCrotch());
+		var showAss: Boolean = (pc.isAssVisible() && !pc.isCoveringAss());
+		if(showTits || showCrotch || showAss)
 		{
 			clearOutput();
-			output("Nudity is illegal in that location! You’ll have to cover up if you want to go there.");
+			output("Nudity is illegal in that location!  You’ll have to cover up your")
+			if (showTits) {
+				output(" tits");
+				if(showCrotch && showAss) output2(",");
+				else if (showCrotch || showAss) output(" and");
+			} 
+			if (showCrotch) {
+				output(" crotch");
+				if (showAss) output(" and");
+			}
+			if (showAss) output(" ass");
+			output(" if you want to go there.");
 			clearMenu();
 			if(currentLocation == "SHIP INTERIOR") { /* No need to sneak back if already in ship! */ }
 			else addButton(0, "SneakBack", sneakBackYouNudist, undefined, "SneakBack", "Sneak back to the ship. Fuckin’ prudes. It might take you a couple hours to get back safely.");

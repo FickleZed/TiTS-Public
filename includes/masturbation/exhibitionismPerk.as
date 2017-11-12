@@ -355,7 +355,7 @@ public function exhibitionismStrip(voluntary:Boolean = true):void
 	output("\n\n");
 	if(!pc.isNude())
 	{
-		var bigWings:Boolean = (pc.canCoverSelf(false, "wings"));
+		var bigWings:Boolean = (pc.canWingsCoverSelf(false));
 		
 		output("You begin your show by");
 		

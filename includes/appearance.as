@@ -68,12 +68,38 @@ public function appearance(forTarget:Creature):void
 	if(target.tallness % 12 != 0) output2(" and " + Math.round(target.tallness % 12) + " inches");
 	output2(" tall by ancient imperial measurements and " + Math.round(target.tallness * 0.0254 * 100)/100 + " meters in the more accepted metric system.");
 	
-	var isNude:Boolean = (target.isNude());
+	// Outfit / Nudity
+	var isNude:Boolean = (target.isNude() && !(target.hasBreasts() && target.isCoveringChest()) && !target.isCoveringCrotch());
 	var showTits:Boolean = (target.isChestVisible() && target.hasBreasts());
 	var showCrotch:Boolean = (target.isCrotchVisible());
 	var showAss:Boolean = (target.isAssVisible());
 	var allExposed:Boolean = (target.isChestExposed() && target.isCrotchExposed() && target.isAssExposed());
-	output2(" Right now, you’re");
+	output2(" Right now,")
+	// Wings as "clothes"
+	if (target.areWingsCoveringSelf()) {
+		var lotsUpFront: Boolean = (target.wingCount > 2 && !target.areWingsCoveringAss() || target.wingCount > 4);
+		if (lotsUpFront) output2(" several large pairs");
+		else (" a large pair");
+		output2(" of");
+		switch(target.wingType) {
+			case GLOBAL.TYPE_AVIAN:
+			case GLOBAL.TYPE_DOVE:
+				output2(" soft, feathery");
+				break;
+			case GLOBAL.TYPE_DEMONIC:
+				output2(" leathery, bat-like");
+				break;
+			case GLOBAL.TYPE_DRACONIC:
+			case GLOBAL.TYPE_GRYVAIN:
+				output2(" magnificent scaled");
+				break;
+		}
+		output2(" wings sprouting from your back fold" + (lotsUpFront ? "s" : "") + " over your shoulders to drape over your front like a shawl");
+		if (showAss && target.areWingsCoveringAss()) output2(" while another pair discretely covers your behind");
+		output2(". Underneath the wings,");
+	}
+	// Clothes as clothes
+	output2(" you’re");
 	if(isNude || target.armor is EmptySlot) output2(" not wearing a single scrap of armor,");
 	else output2(" wearing " + target.armor.description + ",");
 	if(isNude || target.lowerUndergarment is EmptySlot) output2(" going commando down south,");
@@ -82,22 +108,76 @@ public function appearance(forTarget:Creature):void
 	else output2(" and girding your upper body with " + target.upperUndergarment.description + ".");
 	if(!isNude && (showTits || showCrotch || showAss))
 	{
-		output2(" Your outfit leaves little to the imagination, " + (!allExposed ? "revealing" : "exposing") + " your");
-		if(showTits)
+		var coverTits: Boolean = showTits && target.isCoveringChest();
+		var coverCrotch: Boolean = showCrotch && target.isCoveringCrotch();
+		var coverAss: Boolean = showAss && target.isCoveringAss();
+		var stillShowTits: Boolean = showTits && !coverTits;
+		var stillShowCrotch: Boolean = showCrotch && !coverCrotch;
+		var stillShowingAss: Boolean = showAss && !coverAss;
+		if (coverTits || coverCrotch || coverAss) {
+			var usingFur: Boolean = target.isFurCoveringChest() || target.isFurCoveringCrotch() || target.isFurCoveringAss();
+			var coverCount: Number = (usingFur ? 1 : 0) + (target.isHairCoveringChest() ? 1 : 0) + (target.areWingsCoveringSelf() ? 1 : 0) + (target.areTailsCoveringAss() ? 1 : 0);
+			var coveredTracking: Number = 0;
+			output2(" Your");
+			if (usingFur) {
+				output2((targethasSkinFlag(GLOBAL.FLAG_FLUFFY) ? " thick" : "") + (target.hasFeathers() ? " feathers":" fur"));
+				if (coverCount - coveredTracking > 2) output2(",");
+				else if (coverCount - coveredTracking == 2) output(" and");
+				coveredTracking++;
+			}
+			if (target.isHairCoveringChest()) {
+				output2(" carefully arranged hair");
+				if (coverCount - coveredTracking > 2) output2(",");
+				else if (coverCount - coveredTracking == 2) output(" and");
+				coveredTracking++;
+			}
+			if (target.areWingsCoveringSelf()) {
+				output2(" shawl of wings");
+				if (coverCount - coveredTracking > 2) output2(",");
+				else if (coverCount - coveredTracking == 2) output(" and");
+				coveredTracking++;
+			}
+			if (target.areTailsCoveringAss()) {
+				output2(" tail" + (target.tailCount > 1 ? "s" : ""));
+				if (coverCount - coveredTracking > 2) output2(",");
+				else if (coverCount - coveredTracking == 2) output(" and");
+				coveredTracking++;
+			}
+			var pluralCover: Boolean = target.areWingsCoveringSelf() || coverCount > 1;
+			output2((pluralCover ? " are" : " is") + " the only thing" + (pluralCover ? "s" : "") + " keeping your decency over your");
+			if(coverTits)
+			{
+				output2(" breasts");
+				if(coverCrotch && coverAss) output2(",");
+				else if(coverCrotch || coverAss) output2(" and");
+			}
+			if(coverCrotch)
+			{
+				output2(" crotch");
+				if(coverAss) output2(" and");
+			}
+			if(coverAss) output2(" ass");
+			output2(".");
+			if (stillShowTits || stillShowCrotch || stillShowAss) output2(" Otherwise, your");
+		}
+		else output2(" Your")
+
+		output2(" outfit leaves little to the imagination, " + (!allExposed ? "revealing" : "exposing") + " your");
+		if(stillShowTits)
 		{
 			output2(" breasts");
-			if(showCrotch && showAss) output2(",");
-			else if(target.isCrotchVisible() || showAss) output2(" and");
+			if(stillShowCrotch && stillShowAss) output2(",");
+			else if(stillShowCrotch || stillShowAss) output2(" and");
 		}
-		if(showCrotch)
+		if(stillShowCrotch)
 		{
 			output2(" crotch");
-			if(target.isAssVisible()) output2(" and");
+			if(stillShowAss) output2(" and");
 		}
-		if(showAss) output2(" ass");
+		if(stillShowAss) output2(" ass");
 		output2(" to the world.");
 	}
-	if(allExposed && !target.canUseTailsOrFurAsClothes())
+	if(allExposed)
 	{
 		var exhibitionism:Number = target.exhibitionism();
 		if(exhibitionism >= 100) output2(" You’re a shameless exhibitionist and proud of it, flaunting your naked body and giving the entire galaxy quite an eyeful!");
@@ -1053,7 +1133,7 @@ public function appearance(forTarget:Creature):void
 				if(target.wingCount == 2) output2(" a pair of");
 				else if(target.wingCount == 4) output2(" a quartet of");
 				else if(target.wingCount > 1) output2(" " + num2Text(int(target.wingCount)));
-				output2(" large bat-like demon-wings fold " + (target.statusEffectv1("Wing Position") == 1 ? "over your body" : "behind your shoulders") + ". With a muscle-twitch, you can extend them, and use them to soar gracefully through the air.");
+				output2(" large bat-like demon-wings fold " + (target.areWingsCoveringSelf() ? "over your body" : "behind your shoulders") + ". With a muscle-twitch, you can extend them, and use them to soar gracefully through the air.");
 				break;
 			case GLOBAL.TYPE_SHARK:
 				if(target.wingCount == 2) output2(" a pair of ");
@@ -1066,13 +1146,13 @@ public function appearance(forTarget:Creature):void
 				if(target.wingCount == 2) output2(" a pair of");
 				else if(target.wingCount == 4) output2(" a quartet of");
 				else if(target.wingCount > 1) output2(" " + num2Text(int(target.wingCount)));
-				output2(" large, feathery wings sprout from your back" + (target.statusEffectv1("Wing Position") == 1 ? " and fold over your body" : "") + ". Though you usually keep the " + target.furColor + "-colored wings folded close, they can unfurl to allow you to soar as gracefully as a bird.");
+				output2(" large, feathery wings sprout from your back" + (target.areWingsCoveringSelf() ? " and fold over your body" : "") + ". Though you usually keep the " + target.furColor + "-colored wings folded close, they can unfurl to allow you to soar as gracefully as a bird.");
 				break;
 			case GLOBAL.TYPE_SMALLDRACONIC:
 				output2(" small, vestigial wings sprout from your shoulders. They might look like bat’s wings, but the membranes are covered in fine, delicate scales.");
 				break;
 			case GLOBAL.TYPE_DRACONIC:
-				output2(" magnificent "+ target.scaleColor + " wings sprout from your shoulders" + (target.statusEffectv1("Wing Position") == 1 ? " and fold over your body" : "") + ". When unfurled they stretch further than your arm span, and a single beat of them is all you need to set out toward the sky. They look a bit like bat’s wings, but the membranes are covered in fine, delicate scales and a wicked talon juts from the end of each bone.");
+				output2(" magnificent "+ target.scaleColor + " wings sprout from your shoulders" + (target.areWingsCoveringSelf() ? " and fold over your body" : "") + ". When unfurled they stretch further than your arm span, and a single beat of them is all you need to set out toward the sky. They look a bit like bat’s wings, but the membranes are covered in fine, delicate scales and a wicked talon juts from the end of each bone.");
 				break;
 			case GLOBAL.TYPE_DRAGONFLY:
 				output2(" giant dragonfly wings hang from your shoulders. At a whim, you could twist them into a whirring rhythm fast enough to lift you off the ground and allow you to fly.");
@@ -2447,7 +2527,7 @@ public function appearance(forTarget:Creature):void
 	addGhostButton(btnIndex++, "PrefGender", selectGenderPref, undefined, "Preferred Gender", "Indicate the gender you would prefer your character to be considered.");
 	
 	// Wing position
-	if(target.canCoverSelf(false, "wings")) addGhostButton(btnIndex++, StringUtil.toDisplayCase(target.wingsDescript(true)), selectWingPref, undefined, "Position " + StringUtil.toDisplayCase(target.wingsDescript(true)), "Change the position of your " + target.wingsDescript(true) + ".");
+	if(target.canWingsCoverSelf()) addGhostButton(btnIndex++, StringUtil.toDisplayCase(target.wingsDescript(true)), selectWingPref, undefined, "Position " + StringUtil.toDisplayCase(target.wingsDescript(true)), "Change the position of your " + target.wingsDescript(true) + ".");
 	
 	//PC Goo'ed up?
 	if(target.hairType == GLOBAL.HAIR_TYPE_GOO || target.hasStatusEffect("Goo Vent") || target.hasStatusEffect("Goo Crotch"))

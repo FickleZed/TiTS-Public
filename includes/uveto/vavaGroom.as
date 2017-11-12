@@ -686,7 +686,7 @@ public function vavaGroomServiceGrooming(page:int = 0):void
 			else output(" You touch your bald head slightly disbelievingly. Damn, people are going to have to wear snow goggles around you - that thing is catching the light something fierce.");
 			output("\n\n<i>“Superb,”</i> says Cruff, admiring his and his partner’s handiwork with a small smile");
 			if(pc.hasArmor()) output(" as you climb back into your [pc.armor]");
-			else if(pc.canCoverSelf(false, "wings") && pc.statusEffectv1("Wing Position") == 1) output(" as you sweep your [pc.wings] back around you");
+			else if(pc.areWingsCoveringSelf()) output(" as you sweep your [pc.wings] back around you");
 			output(". <i>“It’s good to work with such healthy material.”</i>");
 			output("\n\n<i>“See you soon [pc.name]!”</i> says Estie after she leads you back to the reception area. You are going to practically bounce out of here - your whole body feels rested and refreshed. You just want to strut around, on Tavros maybe, see how many people you can make stare. <i>“");
 			
