@@ -162,20 +162,22 @@ public function appearance(forTarget:Creature):void
 		}
 		else output2(" Your")
 
-		output2(" outfit leaves little to the imagination, " + (!allExposed ? "revealing" : "exposing") + " your");
-		if(stillShowTits)
-		{
-			output2(" breasts");
-			if(stillShowCrotch && stillShowAss) output2(",");
-			else if(stillShowCrotch || stillShowAss) output2(" and");
+		if (stillShowTits || stillShowCrotch || stillShowAss) {
+			output2(" outfit leaves little to the imagination, " + (!allExposed ? "revealing" : "exposing") + " your");
+			if(stillShowTits)
+			{
+				output2(" breasts");
+				if(stillShowCrotch && stillShowAss) output2(",");
+				else if(stillShowCrotch || stillShowAss) output2(" and");
+			}
+			if(stillShowCrotch)
+			{
+				output2(" crotch");
+				if(stillShowAss) output2(" and");
+			}
+			if(stillShowAss) output2(" ass");
+			output2(" to the world.");
 		}
-		if(stillShowCrotch)
-		{
-			output2(" crotch");
-			if(stillShowAss) output2(" and");
-		}
-		if(stillShowAss) output2(" ass");
-		output2(" to the world.");
 	}
 	if(allExposed)
 	{
